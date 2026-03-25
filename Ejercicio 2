@@ -1,0 +1,247 @@
+from datetime import datetime
+#Usuario=admin Contraseña=123
+class Obra:
+    def __init__(self, nombre, autor, periodo, fecha_creacion, fecha_ingreso, valor, estilo, descripcion):
+        self.nombre = nombre
+        self.autor = autor
+        self.periodo = periodo
+        self.fecha_creacion = fecha_creacion
+        self.fecha_ingreso = fecha_ingreso
+        self.valor = valor
+        self.estilo = estilo
+        self.descripcion = descripcion
+        self.estado = "Expuesta"
+        self.restauraciones = []
+        self.cedida = False
+
+    def necesita_restauracion(self):
+        años = (datetime.now() - self.fecha_ingreso).days / 365
+        return años >= 5
+
+    def enviar_restauracion(self, tipo):
+        self.estado = "Restauración"
+        fecha_inicio = datetime.now()
+        self.restauraciones.append((tipo, fecha_inicio, None))
+        print("Obra enviada a restauración")
+
+    def finalizar_restauracion(self):
+        if self.restauraciones:
+            tipo, inicio, _ = self.restauraciones[-1]
+            self.restauraciones[-1] = (tipo, inicio, datetime.now())
+            self.estado = "Expuesta"
+            print("Restauración finalizada")
+
+    def ver_historial(self):
+        print("\nHistorial de restauraciones:")
+        for tipo, inicio, fin in self.restauraciones:
+            print(f"Tipo: {tipo} | Inicio: {inicio} | Fin: {fin}")
+
+class Cuadro(Obra):
+    def __init__(self, nombre, autor, periodo, fecha_creacion, fecha_ingreso, valor, estilo, tecnica, descripcion):
+        super().__init__(nombre, autor, periodo, fecha_creacion, fecha_ingreso, valor, estilo, descripcion)
+        self.tecnica = tecnica
+
+
+class Escultura(Obra):
+    def __init__(self, nombre, autor, periodo, fecha_creacion, fecha_ingreso, valor, estilo, material, descripcion):
+        super().__init__(nombre, autor, periodo, fecha_creacion, fecha_ingreso, valor, estilo, descripcion)
+        self.material = material
+
+
+class OtroObjeto(Obra):
+    def __init__(self, nombre, autor, periodo, fecha_creacion, fecha_ingreso, valor, estilo, descripcion):
+        super().__init__(nombre, autor, periodo, fecha_creacion, fecha_ingreso, valor, estilo, descripcion)
+
+class Usuario:
+    def __init__(self, user, password):
+        self.user = user
+        self.password = password
+
+    def login(self, user, password):
+        return self.user == user and self.password == password
+
+class Museo:
+    def __init__(self):
+        self.obras = []
+        self.museos_colaboradores = ["Museo Nacional", "Louvre", "Prado"]
+
+    def agregar_obra(self, obra):
+        self.obras.append(obra)
+
+    def mostrar_obras(self):
+         for i, obra in enumerate(self.obras):
+             print(f"\n--- OBRA {i + 1} ---")
+             print(f"Nombre: {obra.nombre}")
+             print(f"Autor: {obra.autor}")
+             print(f"Periodo: {obra.periodo}")
+             print(f"Estilo: {obra.estilo}")
+             print(f"Valor: ${obra.valor}")
+             print(f"Estado: {obra.estado}")
+             print(f"Descripción: {obra.descripcion}")
+
+    def revisar_restauraciones(self):
+        for obra in self.obras:
+            if obra.necesita_restauracion():
+                print(f"Obra de {obra.autor} necesita restauración")
+
+    def valor_total(self):
+        return sum(obra.valor for obra in self.obras)
+
+    def mostrar_museos(self):
+        print("\nMuseos disponibles:")
+        for i, m in enumerate(self.museos_colaboradores):
+            print(f"{i + 1}. {m}")
+
+class Cesion:
+    def __init__(self, obra, museo_destino, valor, dias):
+        self.obra = obra
+        self.museo_destino = museo_destino
+        self.valor = valor
+        self.dias = dias
+
+    def realizar(self):
+        if self.obra.cedida:
+            print("La obra ya está cedida")
+        else:
+            self.obra.cedida = True
+            print(f"Obra cedida a {self.museo_destino} por {self.dias} días. Valor: ${self.valor}")
+
+def main():
+    museo = Museo()
+    admin = Usuario("admin", "123")
+
+    user = input("Usuario: ")
+    password = input("Contraseña: ")
+
+    if not admin.login(user, password):
+        print("Acceso denegado")
+        return
+
+    print("Acceso permitido")
+    
+    museo.agregar_obra(Cuadro(
+    "La noche estrellada",
+    "Van Gogh",
+    "Postimpresionismo",
+    datetime(1889,6,1),
+    datetime(2012,5,10),
+    7000,
+    "Postimpresionista",
+    "Óleo",
+    "Representa un cielo nocturno lleno de movimiento y emoción."
+))
+    museo.agregar_obra(Cuadro(
+    "La Mona Lisa",
+    "Da Vinci",
+    "Renacimiento",
+    datetime(1503,1,1),
+    datetime(2010,3,15),
+    10000,
+    "Renacentista",
+    "Óleo",
+    "Retrato famoso por su enigmática sonrisa."
+))
+    museo.agregar_obra(Escultura(
+    "David",
+    "Miguel Ángel",
+    "Renacimiento",
+    datetime(1504,1,1),
+    datetime(2005,9,10),
+    12000,
+    "Renacentista",
+    "Mármol",
+    "Escultura que representa la perfección del cuerpo humano."
+))
+    museo.agregar_obra(Escultura(
+    "El pensador",
+    "Rodin",
+    "Moderno",
+    datetime(1902,1,1),
+    datetime(2010,1,1),
+    8000,
+    "Realismo",
+    "Bronce",
+    "Figura que simboliza la reflexión profunda."
+))
+    museo.agregar_obra(OtroObjeto(
+    "Máscara ceremonial",
+    "Cultura Maya",
+    "Precolombino",
+    datetime(900,1,1),
+    datetime(2016,2,14),
+    5000,
+    "Precolombino",
+    "Objeto ritual utilizado en ceremonias religiosas."
+))
+    museo.agregar_obra(OtroObjeto(
+    "Vasija egipcia",
+    "Artesano Egipcio",
+    "Antiguo",
+    datetime(1300,1,1),
+    datetime(2008,6,30),
+    4000,
+    "Egipcio",
+    "Recipiente utilizado para almacenar aceites y perfumes."
+))
+
+    while True:
+        print("\n--- Museo Louvre ---")
+        print("1. Ver obras")
+        print("2. Revisar restauraciones")
+        print("3. Enviar a restauración")
+        print("4. Finalizar restauración")
+        print("5. Ver historial")
+        print("6. Registrar daño")
+        print("7. Ceder obra")
+        print("8. Valor total")
+        print("9. Salir")
+
+        op = input("Seleccione: ")
+
+        if op == "1":
+            museo.mostrar_obras()
+
+        elif op == "2":
+            museo.revisar_restauraciones()
+
+        elif op == "3":
+            museo.mostrar_obras()
+            i = int(input("Seleccione obra: ")) - 1
+            tipo = input("Tipo: ")
+            museo.obras[i].enviar_restauracion(tipo)
+
+        elif op == "4":
+            museo.mostrar_obras()
+            i = int(input("Seleccione obra: ")) - 1
+            museo.obras[i].finalizar_restauracion()
+
+        elif op == "5":
+            museo.mostrar_obras()
+            i = int(input("Seleccione obra: ")) - 1
+            museo.obras[i].ver_historial()
+
+        elif op == "6":
+            museo.mostrar_obras()
+            i = int(input("Obra dañada: ")) - 1
+            museo.obras[i].enviar_restauracion("Daño")
+
+        elif op == "7":
+            museo.mostrar_obras()
+            i = int(input("Seleccione obra: ")) - 1
+            museo.mostrar_museos()
+            m = int(input("Seleccione museo: ")) - 1
+            valor = float(input("Valor: "))
+            dias = int(input("Días: "))
+            cesion = Cesion(museo.obras[i], museo.museos_colaboradores[m], valor, dias)
+            cesion.realizar()
+
+        elif op == "8":
+            print("Valor total:", museo.valor_total())
+
+        elif op == "9":
+            break
+
+        else:
+            print("Opción inválida")
+
+main()
